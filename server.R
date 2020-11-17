@@ -91,7 +91,7 @@ server <- function(input, output){
 }
 
 # execute shinyApp 
-shinyApp(ui = ui, server = server)
+#shinyApp(ui = ui, server = server)
 
 ######## DASHBOARD WIDGET END ##########
 
