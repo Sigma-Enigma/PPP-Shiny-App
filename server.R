@@ -1,20 +1,30 @@
 # Interactive PPP Mapping Widget Server
 
-require(rgdal)
-require(dplyr)
-require(RColorBrewer)
-require(shiny)
-require(shinydashboard)
-require(leaflet)
-require(DT)
+library(rgdal)
+library(dplyr)
+library(RColorBrewer)
+library(shiny)
+library(shinydashboard)
+library(leaflet)
+library(DT)
 
-load(file = "PPP_Widget_Data_Cleaned.RData")
 
 # Define server input/output logic to pass map data and build map widget
 server <- function(input, output){
+  
+  # select dataset
+  zipAndDateAggregatedData <- reactive({
+    filename <- paste0(input$stateName, ".Rdata")
+    get(load(filename)) # this is loading and overwriting all 3 objects then storing the last one as pppData
+  }) # look into observe() function, and reconsider your data architecture
+  # may need to break up this workspace load into 3 separate object loads, as you are updating 3 separate objects
+  # will need to change values like ZipAndDateAggregatedData to be dynamic
+  # https://stackoverflow.com/questions/53016404/advantages-of-reactive-vs-observe-vs-observeevent
+  # https://shiny.rstudio.com/reference/shiny/latest/observe.html
+  
   dataInput <- eventReactive(input$actionButton, {
     # use dplyr to aggregate data and create tables to pass to polygons 
-    zipAndDateAggregatedData %>%
+    zipAndDateAggregatedData() %>%
       filter( DateApproved >= input$DateApproved[1] ) %>% # lower slider bound
       filter( DateApproved <= input$DateApproved[2] ) %>% # upper slider bound
       group_by( Zip ) %>% # create data table given slider inputs
@@ -30,7 +40,7 @@ server <- function(input, output){
   
   # re-order data for label values so they line up nicely with zipboundary polygons table order
   dataInputOrdered <- eventReactive(input$actionButton, { 
-    dataInput()[order(match(dataInput()$Zip, finalZipBoundaryShapefile$ZCTA5CE10)), ] 
+    dataInput()[order(match(dataInput()$Zip, finalZipBoundaryShapefile()$ZCTA5CE10)), ] 
   })
   
   
@@ -61,8 +71,8 @@ server <- function(input, output){
   
   # build and render leaflet map
   output$leafletMap <- renderLeaflet( 
-    leaflet(finalZipBoundaryShapefile) %>% 
-      setView(lng = -118.01, lat = 34.00, zoom = 9) %>% # sets initial map starting view
+    leaflet(finalZipBoundaryShapefile()) %>% 
+      setView(lng = state.center$x[which(state.name == input$stateName[1] )], lat = state.center$y[which(state.name == input$stateName[1] )], zoom = 7 ) %>% # sets initial map starting view
       addProviderTiles(providers$CartoDB.Positron) %>%  # adding background base map
       addPolygons( weight = 1, # adding shapefiles
                    smoothFactor = 0.5,

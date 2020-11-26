@@ -1,17 +1,17 @@
 # Interactive PPP Mapping Widget UI
 
-require(rgdal)
-require(dplyr)
-require(RColorBrewer)
-require(shiny)
-require(shinydashboard)
-require(leaflet)
-require(DT)
+library(rgdal)
+library(dplyr)
+library(RColorBrewer)
+library(shiny)
+library(shinydashboard)
+library(leaflet)
+library(DT)
 
 #require(rmapshaper)
 # require(profvis) # for optimization testing
 
-load(file = "PPP_Widget_Data_Cleaned.RData")
+load(file = "California.RData")
 # find way to autorun this script upon navigating to the web-page
 
 ######### DASHBOARD WIDGET BEGIN ############
@@ -23,13 +23,14 @@ ui <- dashboardPage(
   skin = "red",
   dashboardHeader( title = "PPP Loan Dashboard"),
   dashboardSidebar(
+    selectizeInput(inputId = 'stateName', label = 'State', choices = c("Select State" = "", state.name) ),
     dateRangeInput(
       "DateApproved", 
       label = "Date Range",
-      start = min(pppDataCalifornia$DateApproved),
-      end = max(pppDataCalifornia$DateApproved),
-      min = min(pppDataCalifornia$DateApproved),
-      max = max(pppDataCalifornia$DateApproved),
+      start = min(pppData$DateApproved),
+      end = max(pppData$DateApproved),
+      min = min(pppData$DateApproved),
+      max = max(pppData$DateApproved),
       format = "yyyy-mm-dd",
       separator = " to "
     ),
@@ -39,7 +40,7 @@ ui <- dashboardPage(
     
   ),
   dashboardBody(
-    fluidRow( box( width = 12, leafletOutput( outputId = "leafletMap", height = "750px" ) ) ), #adjust height when publishing
+    fluidRow( box( width = 12, leafletOutput( outputId = "leafletMap", height = "750px" ) ) ), #adjust height when publishing to dynamically adjust to users screen size
     fluidRow( box( width = 12, dataTableOutput( outputId = "summaryTable" ) ) )
   )
   
