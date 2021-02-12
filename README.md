@@ -2,6 +2,8 @@
 
 This web application is a geospatial dashboard built using shiny-server on AWS.
 
+Video demonstration of mapping app: https://youtu.be/0Hkk0vEpSug
+
 It uses PPP data collected from the US Small Business Administration:
 https://www.sba.gov/funding-programs/loans/coronavirus-relief-options/paycheck-protection-program#section-header-11
 
